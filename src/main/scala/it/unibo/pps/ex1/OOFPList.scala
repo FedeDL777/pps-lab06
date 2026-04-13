@@ -13,6 +13,7 @@ enum List[A]:
   def tail: Option[List[A]] = this match
     case h :: t => Some(t)
     case _ => None
+
   def foreach(consumer: A => Unit): Unit = this match
     case h :: t => consumer(h); t.foreach(consumer)
     case _ =>
@@ -27,11 +28,11 @@ enum List[A]:
     case _ => init
 
   def foldRight[B](init: B)(op: (A, B) => B): B = this match
-    case h :: t => op(h, t.foldRight(init)(op))
+    case ::(h, t) => op(h, t.foldRight(init)(op))
     case _ => init
 
   def append(list: List[A]): List[A] =
-    foldRight(list)(_ :: _)
+    this.foldRight(list)(_ :: _)
 
   def flatMap[B](f: A => List[B]): List[B] =
     foldRight(Nil())(f(_) append _)
@@ -45,10 +46,22 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
   
   // Exercise: implement the following methods
-  def zipWithValue[B](value: B): List[(A, B)] = ???
-  def length(): Int = ???
-  def indices(): List[A] = ???
-  def zipWithIndex: List[(A, Int)] = ???
+  def zipWithValue[B](value: B): List[(A, B)] = this.map[(A, B)](x => (x, value))
+
+  def length(): Int = this.foldLeft[Int](0)((x, _) => x+1);
+  //def indices(): List[Int] = this.foldLeft(0 :: Nil())()
+
+  def indices(): List[Int] =
+    def _indices1(acc: Int): List[Int] = this match {
+      case h :: t => acc :: _indices1(acc+1)
+      case _ => Nil()
+    }
+    _indices1(0)
+
+
+
+  def zipWithIndex: List[(A, Int)] =
+    def _zipWithIndex
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
@@ -66,6 +79,7 @@ object List:
 
 object Test extends App:
   import List.*
+  val sas = 1 :: 2 :: 3 :: Nil()
   val reference = List(1, 2, 3, 4)
   println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.length()) // 4
