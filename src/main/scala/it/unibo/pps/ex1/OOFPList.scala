@@ -52,17 +52,28 @@ enum List[A]:
   //def indices(): List[Int] = this.foldLeft(0 :: Nil())()
 
   def indices(): List[Int] =
-    def _indices1(acc: Int): List[Int] = this match {
-      case h :: t => acc :: _indices1(acc+1)
+    def _indices1(list: List[A], acc: Int): List[Int] = list match {
+      case h :: t => acc :: _indices1(t ,acc+1)
       case _ => Nil()
     }
-    _indices1(0)
+    _indices1(this, 0)
 
 
+
+  def indices2(): List[Int] =
+    this.foldLeft((0, List[Int]()))((acc, _) => (acc._1 + 1, acc._2.append(acc._1 :: Nil())))._2
+
+  def zipWithIndex2: List[(A, Int)] = ???
+  //  this.foldRight((0, List[(A, Int)]()))(acc, _) => ()
 
   def zipWithIndex: List[(A, Int)] =
-    def _zipWithIndex
-  def partition(predicate: A => Boolean): (List[A], List[A]) = ???
+    def _zipWithIndex(list: List[A], index: Int): List[(A, Int)] = list match {
+      case h :: t => (h, index) :: _zipWithIndex(t, index+1)
+      case _ => Nil()
+    }
+    _zipWithIndex(this, 0)
+
+  def partition(predicate: A => Boolean): (List[A], List[A]) = (this.filter(predicate), this.filter(x => !predicate(x)))
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
@@ -84,6 +95,7 @@ object Test extends App:
   println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.length()) // 4
   println(reference.indices()) // List(0, 1, 2, 3)
+  println(reference.indices2()) // List(0, 1, 2, 3)
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
   println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
   println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
